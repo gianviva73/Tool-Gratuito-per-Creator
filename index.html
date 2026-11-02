@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Thumbnail Concept Generator</title>
+    <!-- Tailwind CSS CDN per layout responsive rapido e flessibile -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        yt: {
+                            bg: '#0f0f0f',
+                            card: '#1f1f1f',
+                            border: '#333333',
+                            hover: '#282828',
+                            red: '#ff0000',
+                            redHover: '#cc0000',
+                            text: '#f1f1f1',
+                            muted: '#aaaaaa'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f0f;
+            color: #f1f1f1;
+        }
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #282828;
+        }
+
+        .glow-card:hover {
+            border-color: #555555;
+            box-shadow: 0 10px 30px -10px rgba(255, 0, 0, 0.15);
+        }
+
+        .btn-glow {
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 6px 25px rgba(255, 0, 0, 0.5);
+            transform: translateY(-1px);
+        /* Effetti Glow e Bordi */
+        .glow-card {
+           
+        }
+
+        .btn-glow:active {
+            transform: translateY(0);
+        }
+
+        /* Checkbox personalizzata */
+        .custom-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #444444;
+            border-radius: 0.375rem;
+            background-color: #1a1a1a;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .custom-checkbox:checked {
+            background-color: #ff0000;
+            border-color: #ff0000;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '';
+            width: 0.35rem;
+            height: 0.65rem;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-bottom: 2px;
+        }
+
+        /* Toast animation */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .toast-animate {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Loader Animation */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border-left-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Color chip badge */
+        .color-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Scrollbar personalizzata */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #282828;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444444;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-red-600 selection:text-white">
+
+    <!-- Navbar Layout Studio -->
+    <header class="border-b border-yt-border bg-yt-bg/90 backdrop-blur sticky top-0 z-40 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-yt-red p-2 rounded-xl text-white shadow-lg shadow-red-600/20">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-2">
+                        Thumbnail Studio <span class="bg-red-500/10 text-red-500 text-xs px-2 py-0.5 rounded-full border border-red-500/20 font-medium">PRO</span>
+                    </h1>
+                    <p class="text-xs text-yt-muted">Generatore Strategico di Concept & High-CTR Miniatures</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="https://youtube.com/@digitalcreatorlabIT" target="_blank" rel="noopener noreferrer" class="text-xs bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-red-400 hover:text-red-300 px-3.5 py-2 rounded-xl transition flex items-center gap-2 font-semibold">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                    <span>Digital Creator Lab</span>
+                </a>
+                <button onclick="toggleGuideModal(true)" class="text-xs bg-yt-card hover:bg-yt-hover border border-yt-border hover:border-gray-500 text-yt-text px-3.5 py-2 rounded-xl transition flex items-center gap-2 font-medium">
+                    <span>📖</span>
+                    <span>Guida Utente</span>
+                </button>
+                <span class="hidden md:inline-block text-xs text-yt-muted bg-yt-card px-3 py-1.5 rounded-lg border border-yt-border">
+                    💡 80% del successo di un video dipende dalla copertina
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-10">
+
+        <!-- Preset Rapid Suggestions & Quick Test Demo -->
+        <section class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider text-yt-muted">Esempi rapidi & Test Istruiti:</p>
+                <button onclick="loadDemoAndGenerate()" class="text-xs text-amber-400 hover:text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5 self-start sm:self-auto">
+                    <span>🚀</span>
+                    <span>Carica Titolo Demo & Test Rimasto</span>
+                </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="applyPreset('Ho provato la VR per 30 giorni (Risultati Folli)', 'Tech & Tutorial', 'Shock / Sorpresa')" 
+                        class="text-xs bg-yt-card hover:bg-yt-hover border border-yt-border hover:border-gray-500 text-yt-text px-3 py-2 rounded-lg transition text-left flex items-center gap-2">
+                    <span>🥽</span> <span>"Ho provato la VR per 30 giorni"</span>
+                </button>
+                <button onclick="applyPreset('Come guadagnare 1.000€ al mese con l\'AI nel 2026', 'Finanza & Business', 'Istruttivo / Professionale')" 
+                        class="text-xs bg-yt-card hover:bg-yt-hover border border-yt-border hover:border-gray-500 text-yt-text px-3 py-2 rounded-lg transition text-left flex items-center gap-2">
+                    <span>💡</span> <span>"Guadagnare 1.000€/mese con l'AI"</span>
+                </button>
+                <button onclick="applyPreset('Ho battuto il boss più difficile di Elden Ring bendato', 'Gaming', 'Drammatico / Sfida')" 
+                        class="text-xs bg-yt-card hover:bg-yt-hover border border-yt-border hover:border-gray-500 text-yt-text px-3 py-2 rounded-lg transition text-left flex items-center gap-2">
+                    <span>🎮</span> <span>"Boss Elden Ring bendato"</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Input Form Panel -->
+        <section class="bg-yt-card border border-yt-border rounded-2xl p-6 sm:p-8 shadow-xl">
+            <form id="generatorForm" onsubmit="handleGenerate(event)" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    
+                    <!-- Title Input (7 cols desktop) -->
+                    <div class="md:col-span-12 lg:col-span-6 space-y-2">
+                        <label for="videoTitle" class="block text-sm font-semibold text-yt-text">
+                            Titolo o Argomento del Video <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="videoTitle" required
+                            placeholder="Es: Ho costruito una casa sugli alberi in 48 ore..."
+                            class="w-full bg-yt-bg border border-yt-border focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-xl px-4 py-3 text-sm text-yt-text placeholder-yt-muted outline-none transition">
+                        <p class="text-xs text-yt-muted">Inserisci l'idea principale del tuo video per adattare i testi di copertina.</p>
+                    </div>
+
+                    <!-- Niche Select (3 cols) -->
+                    <div class="md:col-span-6 lg:col-span-3 space-y-2">
+                        <label for="videoNiche" class="block text-sm font-semibold text-yt-text">
+                            Nicchia / Categoria
+                        </label>
+                        <select id="videoNiche" 
+                            class="w-full bg-yt-bg border border-yt-border focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-xl px-4 py-3 text-sm text-yt-text outline-none transition cursor-pointer">
+                            <option value="Tech & Tutorial">Tech & Tutorial</option>
+                            <option value="Gaming">Gaming</option>
+                            <option value="Finanza & Business">Finanza & Business</option>
+                            <option value="Vlog & Storytelling">Vlog & Storytelling</option>
+                            <option value="Intrattenimento">Intrattenimento</option>
+                            <option value="Fitness & Benessere">Fitness & Benessere</option>
+                            <option value="Cucina & Food">Cucina & Food</option>
+                            <option value="Visual Arts & DIY">Visual Arts & DIY</option>
+                        </select>
+                    </div>
+
+                    <!-- Tone Select (3 cols) -->
+                    <div class="md:col-span-6 lg:col-span-3 space-y-2">
+                        <label for="videoTone" class="block text-sm font-semibold text-yt-text">
+                            Tono / Stile Emotivo
+                        </label>
+                        <select id="videoTone" 
+                            class="w-full bg-yt-bg border border-yt-border focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-xl px-4 py-3 text-sm text-yt-text outline-none transition cursor-pointer">
+                            <option value="Curiosità / Mistero">Curiosità / Mistero</option>
+                            <option value="Shock / Sorpresa">Shock / Sorpresa</option>
+                            <option value="Istruttivo / Professionale">Istruttivo / Professionale</option>
+                            <option value="Drammatico / Sfida">Drammatico / Sfida</option>
+                            <option value="Divertente / Ironico">Divertente / Ironico</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-yt-border/50">
+                    <span class="text-xs text-yt-muted hidden sm:inline">
+                        ✨ Verranno generati 3 concept alternativi basati sulle regole di High CTR.
+                    </span>
+                    <button type="submit" id="generateBtn" 
+                        class="w-full sm:w-auto bg-yt-red hover:bg-yt-redHover text-white font-semibold text-sm px-8 py-3.5 rounded-xl btn-glow flex items-center justify-center gap-3 transition">
+                        <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span id="btnSpinner" class="spinner hidden"></span>
+                        <span id="btnText">Genera Concept Copertine</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Results Section (Hidden until generated) -->
+        <section id="resultsSection" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-yt-border pb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        🎯 Concept Strategici Generati
+                    </h2>
+                    <p class="text-xs text-yt-muted">Scegli il concept che crea maggior curiosità o combina gli elementi migliori.</p>
+                </div>
+                <button onclick="copyAllConcepts()" 
+                    class="self-start sm:self-auto text-xs bg-yt-card hover:bg-yt-hover border border-yt-border text-yt-text px-4 py-2 rounded-xl transition flex items-center gap-2">
+                    <span>📋</span> Copia Tutti i 3 Concept
+                </button>
+            </div>
+
+            <!-- Concepts Grid -->
+            <div id="conceptsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Concept Cards Injected via JS -->
+            </div>
+        </section>
+
+        <!-- Interactive Checklist Section -->
+        <section class="bg-yt-card border border-yt-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-yt-border pb-5">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        ✅ Checklist di Validazione Miniatura
+                    </h2>
+                    <p class="text-xs text-yt-muted">Prima di pubblicare la tua copertina, assicurati di spuntare tutti i criteri fondamentali di CTR.</p>
+                </div>
+                
+                <!-- Progress counter -->
+                <div class="flex items-center gap-3 bg-yt-bg px-4 py-2 rounded-xl border border-yt-border">
+                    <span class="text-xs font-semibold text-yt-muted">Score Validazione:</span>
+                    <span id="checklistScore" class="text-sm font-bold text-red-500">0 / 6</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-yt-bg h-2 rounded-full overflow-hidden border border-yt-border">
+                <div id="progressBar" class="bg-gradient-to-r from-red-600 to-amber-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- Checklist Items -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="checklistContainer">
+                
+                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-yt-bg/50 border border-yt-border hover:border-gray-600 transition cursor-pointer">
+                    <input type="checkbox" class="custom-checkbox mt-0.5" onchange="updateChecklistProgress()">
+                    <div class="space-y-0.5">
+                        <span class="text-sm font-semibold text-white block">Leggibilità su Mobile (Schermo Piccolo)</span>
+                        <span class="text-xs text-yt-muted block">Il testo sulla copertina ha massimo 2-4 parole ed è chiaramente leggibile a 100px di ampiezza?</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-yt-bg/50 border border-yt-border hover:border-gray-600 transition cursor-pointer">
+                    <input type="checkbox" class="custom-checkbox mt-0.5" onchange="updateChecklistProgress()">
+                    <div class="space-y-0.5">
+                        <span class="text-sm font-semibold text-white block">Regola dei 3 Elementi Focali</span>
+                        <span class="text-xs text-yt-muted block">Ci sono al massimo 3 elementi principali (es: Volto + Testo + Oggetto) senza ingombri confusi?</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-yt-bg/50 border border-yt-border hover:border-gray-600 transition cursor-pointer">
+                    <input type="checkbox" class="custom-checkbox mt-0.5" onchange="updateChecklistProgress()">
+                    <div class="space-y-0.5">
+                        <span class="text-sm font-semibold text-white block">Contrasto Elevato dal Fondo</span>
+                        <span class="text-xs text-yt-muted block">Il soggetto principale (es: persona o prodotto) si stacca nettamente dallo sfondo mediante contorno o luminosità?</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-yt-bg/50 border border-yt-border hover:border-gray-600 transition cursor-pointer">
+                    <input type="checkbox" class="custom-checkbox mt-0.5" onchange="updateChecklistProgress()">
+                    <div class="space-y-0.5">
+                        <span class="text-sm font-semibold text-white block">Completamento del Titolo (Curiosity Gap)</span>
+                        <span class="text-xs text-yt-muted block">Il testo sulla copertina COMPLETA o crea una domanda rispetto al titolo invece di ripeterlo esattamente?</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-yt-bg/50 border border-yt-border hover:border-gray-600 transition cursor-pointer">
+                    <input type="checkbox" class="custom-checkbox mt-0.5" onchange="updateChecklistProgress()">
+                    <div class="space-y-0.5">
+                        <span class="text-sm font-semibold text-white block">Espressione Emotiva Autentica</span>
+                        <span class="text-xs text-yt-muted block">Se c'è un volto, l'espressione (sorpresa, sospetto, gioia, sconcerto) è ben marcata e direzionata verso l'oggetto chiave?</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-yt-bg/50 border border-yt-border hover:border-gray-600 transition cursor-pointer">
+                    <input type="checkbox" class="custom-checkbox mt-0.5" onchange="updateChecklistProgress()">
+                    <div class="space-y-0.5">
+                        <span class="text-sm font-semibold text-white block">Test Modalità Scura YouTube</span>
+                        <span class="text-xs text-yt-muted block">La copertina mantiene la sua visibilità sia su tema chiaro che su tema scuro di YouTube?</span>
+                    </div>
+                </label>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Guida Utente -->
+    <div id="guideModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-yt-card border border-yt-border w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-yt-border flex items-center justify-between bg-yt-bg">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📖</span>
+                    <h3 class="text-base font-bold text-white">Guida Utente: Come Dominare il CTR su YouTube</h3>
+                </div>
+                <button onclick="toggleGuideModal(false)" class="text-yt-muted hover:text-white p-1 rounded-lg hover:bg-yt-hover transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-6 text-sm text-yt-text">
+                <!-- Sezione 1: Compilazione -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-amber-400 flex items-center gap-2">
+                        <span>1.</span> Compilazione Strategica del Form
+                    </h4>
+                    <p class="text-yt-muted leading-relaxed">
+                        Inserisci il titolo provvisorio del tuo video. Seleziona con cura la <strong>Nicchia</strong> e il <strong>Tono Emotivo</strong> prevalente. Il generatore applicherà regole psicologiche mirate per stimolare il click (Curiosity Gap, High-Stakes o Visual Contrast).
+                    </p>
+                </div>
+
+                <!-- Sezione 2: Regola del Testo -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-amber-400 flex items-center gap-2">
+                        <span>2.</span> Regola del Testo in Copertina (Max 2-4 Parole)
+                    </h4>
+                    <p class="text-yt-muted leading-relaxed">
+                        <strong class="text-white">Non ripetere mai il titolo del video!</strong> La copertina e il titolo lavorano in coppia: il titolo spiega l'argomento per la ricerca, la copertina cattura l'emozione istintiva su smartphone. Usa parole evocative a carattere gigante.
+                    </p>
+                </div>
+
+                <!-- Sezione 3: Psicologia Colori -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-amber-400 flex items-center gap-2">
+                        <span>3.</span> Schemi Colore e Contrasto Focale
+                    </h4>
+                    <p class="text-yt-muted leading-relaxed">
+                        YouTube usa un'interfaccia prevalentemente scura o bianca. Per staccare dal feed occorre usare la <strong>regola dei 3 colori a contrasto complementare</strong> (es. Giallo Neon su Nero/Blu Scuro, Verde Smeraldo su Grigio Antracite).
+                    </p>
+                </div>
+
+                <!-- Sezione 4: Validation Checklist & A/B Testing -->
+                <div class="bg-yt-bg p-4 rounded-xl border border-yt-border space-y-3">
+                    <h4 class="font-bold text-white flex items-center gap-2">
+                        <span>💡</span> Consiglio Pro: A/B Test su YouTube Studio
+                    </h4>
+                    <p class="text-xs text-yt-muted leading-relaxed">
+                        Usa la funzione nativa di YouTube Studio <strong>"Testa e confronta" (Test & Compare)</strong> per caricare fino a 3 miniature contemporaneamente. Il sistema distribuirà le copertine al tuo pubblico e sceglierà automaticamente quella con il CTR più elevato in termini di tempo di visione!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-yt-border bg-yt-bg flex justify-between items-center">
+                <span class="text-xs text-yt-muted hidden sm:inline">Premi tasto ESC per chiudere</span>
+                <button onclick="toggleGuideModal(false)" class="w-full sm:w-auto bg-yt-red hover:bg-yt-redHover text-white text-xs font-semibold px-6 py-2.5 rounded-xl transition">
+                    Ho Capito, Inizia Ora!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-yt-border py-6 px-4 text-center text-xs text-yt-muted">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© YouTube Thumbnail Concept Generator — Creato da <a href="https://youtube.com/@digitalcreatorlabIT" target="_blank" rel="noopener noreferrer" class="text-white hover:text-red-500 font-semibold underline underline-offset-4 decoration-red-500 transition">Digital Creator Lab</a></p>
+            <div class="flex items-center gap-4">
+                <a href="https://youtube.com/@digitalcreatorlabIT" target="_blank" rel="noopener noreferrer" class="hover:text-yt-text transition flex items-center gap-1.5">
+                    <span class="text-red-500">▶</span> @digitalcreatorlabIT
+                </a>
+                <span>•</span>
+                <span>⚡ High-CTR Engine</span>
+                <span>•</span>
+                <span>🎯 YouTube Studio Ready</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Box Container -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+        <div class="bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl font-medium text-sm flex items-center gap-3 toast-animate">
+            <span>✨</span>
+            <span id="toastMessage">Concept copiato negli appunti!</span>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Gestione apertura e chiusura modale Guida Utente
+        function toggleGuideModal(show) {
+            const modal = document.getElementById('guideModal');
+            if (show) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Chiusura modale su tasto ESC o click su backdrop
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') toggleGuideModal(false);
+        });
+
+        document.getElementById('guideModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'guideModal') toggleGuideModal(false);
+        });
+
+        // Demo rapido per test immediato
+        function loadDemoAndGenerate() {
+            applyPreset("Ho provato l'IA per 30 giorni: Ecco cosa è successo davvero", "Tech & Tutorial", "Curiosità / Mistero");
+            const fakeEvent = { preventDefault: () => {} };
+            handleGenerate(fakeEvent);
+        }
+
+        // Preset Quick Fill Function
+        function applyPreset(title, niche, tone) {
+            document.getElementById('videoTitle').value = title;
+            document.getElementById('videoNiche').value = niche;
+            document.getElementById('videoTone').value = tone;
+
+            // Highlight button feedback
+            const form = document.getElementById('generatorForm');
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Database di archetipi visivi e strategie per la generazione
+        const layoutStrategies = {
+            'Curiosità / Mistero': [
+                {
+                    badge: "Concept 1: Il Curiosity Gap",
+                    layout: "Soggetto sfocato o parzialmente oscurato da un velo di ombra a sinistra + freccia o cerchio d'ingrandimento rosso neon a destra che punta a un dettaglio misterioso.",
+                    textGenerator: (t) => "NON RIVELARLO!",
+                    colors: [
+                        { name: "Nero Ossidiana", hex: "#0F0F0F", fg: "#FFFFFF" },
+                        { name: "Rosso Neon", hex: "#FF0033", fg: "#FFFFFF" },
+                        { name: "Giallo Segnale", hex: "#FFCC00", fg: "#000000" }
+                    ],
+                    expression: "Sguardo sospettoso o dubbioso incline di 15°, dito sulla bocca o mano sotto il mento in posa analitica."
+                },
+                {
+                    badge: "Concept 2: Il Confronto Segreto",
+                    layout: "Schermo diviso a metà diagonalmente (Split-screen). Da un lato il metodo classico in grigio, dall'altro l'elemento segreto coperto da un grande punto interrogativo 3D brillante.",
+                    textGenerator: (t) => "LA VERITÀ?",
+                    colors: [
+                        { name: "Blu Notte", hex: "#0A192F", fg: "#FFFFFF" },
+                        { name: "Ciano Elettrico", hex: "#00F0FF", fg: "#000000" },
+                        { name: "Bianco Puro", hex: "#FFFFFF", fg: "#000000" }
+                    ],
+                    expression: "Primo piano frontale con occhi sgranati e sopracciglia sollevate, puntando il dito verso il lato destro."
+                },
+                {
+                    badge: "Concept 3: L'Oggetto Proibito",
+                    layout: "Grandangolo sul soggetto con in mano una scatola/dispositivo da cui fuoriesce una luce brillante e intensa. Sfondo scuro e vignettato.",
+                    textGenerator: (t) => "PERCHÉ QUESTO?",
+                    colors: [
+                        { name: "Viola Scuro", hex: "#1A0B2E", fg: "#FFFFFF" },
+                        { name: "Magenta Flash", hex: "#FF007F", fg: "#FFFFFF" },
+                        { name: "Giallo Brillante", hex: "#FFE600", fg: "#000000" }
+                    ],
+                    expression: "Sguardo meravigliato rivolto direttamente alla sorgente luminosa tra le mani, bocca leggermente socchiusa."
+                }
+            ],
+            'Shock / Sorpresa': [
+                {
+                    badge: "Concept 1: Impatto Dinamico",
+                    layout: "Primo piano ultra-ravvicinato del volto sulla sinistra (zoom 1.2x). Sfondo a destra con un grafico in crollo/impennata o un'esplosione d'impatto visivo.",
+                    textGenerator: (t) => "È FINITA!",
+                    colors: [
+                        { name: "Rosso YouTube", hex: "#FF0000", fg: "#FFFFFF" },
+                        { name: "Giallo Fluorescente", hex: "#FFFF00", fg: "#000000" },
+                        { name: "Nero Fondo", hex: "#121212", fg: "#FFFFFF" }
+                    ],
+                    expression: "Mani sulle guance o sulla testa, bocca spalancata in un'espressione di shock totale, occhi fissi sullo spettatore."
+                },
+                {
+                    badge: "Concept 2: Il Risultato Assurdo",
+                    layout: "Il soggetto a destra guarda scioccato verso un numero o una cifra gigante in 3D posizionata in alto a sinistra, evidenziata con bagliore neon.",
+                    textGenerator: (t) => "HO SBAGLIATO?",
+                    colors: [
+                        { name: "Verde Smeraldo", hex: "#00FF66", fg: "#000000" },
+                        { name: "Nero Antracite", hex: "#1E1E1E", fg: "#FFFFFF" },
+                        { name: "Bianco Lucido", hex: "#FFFFFF", fg: "#000000" }
+                    ],
+                    expression: "Punta l'indice scioccato verso il numero, corpo leggermente inclinato all'indietro."
+                },
+                {
+                    badge: "Concept 3: Prima e Dopo Estremo",
+                    layout: "Due riquadri a contrasto netto: 'PRIMA' (colori spenti, sfocato) vs 'DOPO' (saturo, luminoso con stella brillante d'evidenziazione).",
+                    textGenerator: (t) => "INCREDIBILE!",
+                    colors: [
+                        { name: "Arancione Fuoco", hex: "#FF5500", fg: "#FFFFFF" },
+                        { name: "Blu Elettrico", hex: "#0066FF", fg: "#FFFFFF" },
+                        { name: "Giallo Oro", hex: "#FFD700", fg: "#000000" }
+                    ],
+                    expression: "Viso diviso: un lato perplesso, l'altro con un sorriso vittorioso ed entusiasta."
+                }
+            ],
+            'Istruttivo / Professionale': [
+                {
+                    badge: "Concept 1: La Guida Definitiva",
+                    layout: "Soggetto autorevole a sinistra in postura professionale. A destra, 3 icone o step numerati (1, 2, 3) stilizzati con badge moderni e puliti.",
+                    textGenerator: (t) => "FALLO COSÌ!",
+                    colors: [
+                        { name: "Blu Zaffiro", hex: "#0F52BA", fg: "#FFFFFF" },
+                        { name: "Grigio Chiaro", hex: "#E5E7EB", fg: "#000000" },
+                        { name: "Verde Successo", hex: "#10B981", fg: "#FFFFFF" }
+                    ],
+                    expression: "Sorriso sicuro e professionale, sguardo diretto in camera, postura eretta e braccia incrociate o gesto esplicativo."
+                },
+                {
+                    badge: "Concept 2: Il Metodo Svelato",
+                    layout: "Layout minimal. Grande scritta in sovrapposizione in primo piano a sinistra. A destra l'interfaccia o lo strumento chiave evidenziato da una cornice brillante.",
+                    textGenerator: (t) => "METODO 2026",
+                    colors: [
+                        { name: "Viola Deep", hex: "#4C1D95", fg: "#FFFFFF" },
+                        { name: "Ciano Intenso", hex: "#06B6D4", fg: "#000000" },
+                        { name: "Nero Opaco", hex: "#18181B", fg: "#FFFFFF" }
+                    ],
+                    expression: "Espressione concentrata e accattivante, mano che sostiene una lavagna o tablet figurativo."
+                },
+                {
+                    badge: "Concept 3: Errore vs Soluzione",
+                    layout: "Una grande 'X' rossa su un approccio sbagliato a sinistra e un spunta 'V' verde brillante sulla soluzione perfetta a destra.",
+                    textGenerator: (t) => "SMETTI QUESTO",
+                    colors: [
+                        { name: "Rosso Errore", hex: "#EF4444", fg: "#FFFFFF" },
+                        { name: "Verde Corretto", hex: "#22C55E", fg: "#FFFFFF" },
+                        { name: "Sfondo Antracite", hex: "#27272A", fg: "#FFFFFF" }
+                    ],
+                    expression: "Gesto di stop con la mano sinistra verso l'errore e cenno d'intesa approvante verso la soluzione."
+                }
+            ],
+            'Drammatico / Sfida': [
+                {
+                    badge: "Concept 1: La Sfida Impossibile",
+                    layout: "Timer gigante in sovrimpressione in alto al centro (es: 00:01:00). Soggetto esausto ma determinato in primo piano circondato da luce rossa/cinematografica.",
+                    textGenerator: (t) => "ULTIMA CHANCE",
+                    colors: [
+                        { name: "Rosso Incendio", hex: "#DC2626", fg: "#FFFFFF" },
+                        { name: "Giallo Avviso", hex: "#F59E0B", fg: "#000000" },
+                        { name: "Nero Notte", hex: "#000000", fg: "#FFFFFF" }
+                    ],
+                    expression: "Sudore/dettaglio scenico, sguardo stremato ma intenso rivolto all'obiettivo, fiato sospeso."
+                },
+                {
+                    badge: "Concept 2: Davanti all'Ostacolo",
+                    layout: "Inquadratura dal basso verso l'alto (Low angle). Il soggetto appare piccolo di fronte a un elemento gigantesco o minaccioso sulla destra.",
+                    textGenerator: (t) => "HO RISCHIATO",
+                    colors: [
+                        { name: "Grigio Tempesta", hex: "#374151", fg: "#FFFFFF" },
+                        { name: "Arancione Neon", hex: "#FF6600", fg: "#FFFFFF" },
+                        { name: "Bianco Intenso", hex: "#FFFFFF", fg: "#000000" }
+                    ],
+                    expression: "Sguardo di sfida con determinazione nei tratti del viso, braccia tese verso l'alto o verso il traguardo."
+                },
+                {
+                    badge: "Concept 3: Prova Estrema",
+                    layout: "Layout sdoppiato con effetto fumo/particelle ai lati. Testo gigante ad alto contrasto con bordo spesso al centro della scena.",
+                    textGenerator: (t) => "FINO AL LIMITE",
+                    colors: [
+                        { name: "Rosso Scurissimo", hex: "#7F1D1D", fg: "#FFFFFF" },
+                        { name: "Giallo Caldo", hex: "#FBBF24", fg: "#000000" },
+                        { name: "Nero Carbone", hex: "#111827", fg: "#FFFFFF" }
+                    ],
+                    expression: "Urlo di liberazione o concentrazione massima prima dell'azione finale."
+                }
+            ],
+            'Divertente / Ironico': [
+                {
+                    badge: "Concept 1: La Reazione Meme",
+                    layout: "Vignetta stilizzata o meme cutout a destra. Soggetto a sinistra con espressione comica ed esagerata evidenziata da uno sfondo a raggi colorati.",
+                    textGenerator: (t) => "MA IN SERIE?",
+                    colors: [
+                        { name: "Giallo Meme", hex: "#FACC15", fg: "#000000" },
+                        { name: "Rosa Magenta", hex: "#EC4899", fg: "#FFFFFF" },
+                        { name: "Nero Contrasto", hex: "#0f0f0f", fg: "#FFFFFF" }
+                    ],
+                    expression: "Occhi sbarrati con un sorriso buffo/incredulo, mani tese in avanti nel classico gesto 'perché?'."
+                },
+                {
+                    badge: "Concept 2: Il Disastro Annunciato",
+                    layout: "Soggetto al centro circondato da elementi grafici di caos (fiamme a cartone animato, emoji scioccate giganti in 3D).",
+                    textGenerator: (t) => "UN DISASTRO!",
+                    colors: [
+                        { name: "Arancione Vivido", hex: "#F97316", fg: "#FFFFFF" },
+                        { name: "Viola Elettrico", hex: "#8B5CF6", fg: "#FFFFFF" },
+                        { name: "Bianco Puro", hex: "#FFFFFF", fg: "#000000" }
+                    ],
+                    expression: "Faccia coperta parzialmente da una mano (Facepalm) ma con un occhio che spia tra le dita."
+                },
+                {
+                    badge: "Concept 3: Aspettativa vs Realtà",
+                    layout: "Due riquadri verticali colorati: 'Come doveva andare' (pulito) vs 'Come è andata' (caotico) con il soggetto al centro nel panico.",
+                    textGenerator: (t) => "EXPECTATION V REALITY",
+                    colors: [
+                        { name: "Verde Lime", hex: "#84CC16", fg: "#000000" },
+                        { name: "Rosso Vivo", hex: "#EF4444", fg: "#FFFFFF" },
+                        { name: "Nero Scuro", hex: "#18181B", fg: "#FFFFFF" }
+                    ],
+                    expression: "Sorriso tirato/nervoso e spallucce sollevate verso l'alto."
+                }
+            ]
+        };
+
+        // Genera testo impattante personalizzato sul titolo
+        function generateOverlayText(title, tone, index) {
+            const words = title.trim().split(' ').filter(w => w.length > 3);
+            const mainKeyword = words.length > 0 ? words[Math.floor(Math.random() * words.length)].toUpperCase() : "QUESTO";
+
+            const templates = {
+                'Curiosità / Mistero': [`IL SEGRETO`, `NON FARE ${mainKeyword}`, `LA VERITÀ SUL ${mainKeyword}`],
+                'Shock / Sorpresa': [`MAI PIÙ ${mainKeyword}!`, `ASSURDO!`, `HO PROVATO IL ${mainKeyword}`],
+                'Istruttivo / Professionale': [`GUIDA ${mainKeyword}`, `FALLO COSÌ`, `METODO ${mainKeyword}`],
+                'Drammatico / Sfida': [`SFIDA ${mainKeyword}`, `HO RISCHIATO`, `ULTIMO TENTATIVO`],
+                'Divertente / Ironico': [`PESSIMA IDEA?`, `SBAGLIATO!`, `${mainKeyword} DISASTRO`]
+            };
+
+            const pool = templates[tone] || templates['Shock / Sorpresa'];
+            return pool[index % pool.length];
+        }
+
+        // Gestione form submit
+        function handleGenerate(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('videoTitle').value;
+            const niche = document.getElementById('videoNiche').value;
+            const tone = document.getElementById('videoTone').value;
+
+            // UI Loading state
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            btn.disabled = true;
+            btnText.textContent = "Analisi e Generazione in corso...";
+            btnIcon.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+
+            setTimeout(() => {
+                renderConcepts(title, niche, tone);
+
+                // Ripristina pulsante
+                btn.disabled = false;
+                btnText.textContent = "Rigenera Concept Copertine";
+                btnIcon.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+
+                // Scroll ai risultati
+                const resultsSection = document.getElementById('resultsSection');
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 600);
+        }
+
+        // Renderizza i 3 concept nella griglia
+        function renderConcepts(title, niche, tone) {
+            const container = document.getElementById('conceptsGrid');
+            container.innerHTML = '';
+
+            const strategies = layoutStrategies[tone] || layoutStrategies['Shock / Sorpresa'];
+
+            strategies.forEach((strat, idx) => {
+                const overlayText = generateOverlayText(title, tone, idx);
+                
+                // Color chips HTML
+                const colorChipsHtml = strat.colors.map(c => `
+                    <span class="color-chip" style="background-color: ${c.hex}; color: ${c.fg}">
+                        <span class="w-2 h-2 rounded-full border border-black/20" style="background-color: ${c.hex}"></span>
+                        ${c.name}
+                    </span>
+                `).join('');
+
+                const cardHtml = `
+                    <div class="glow-card bg-yt-card rounded-2xl p-5 flex flex-col justify-between space-y-5 relative group">
+                        
+                        <div class="space-y-4">
+                            <!-- Header & Badge -->
+                            <div class="flex items-center justify-between border-b border-yt-border pb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-red-500 bg-red-500/10 px-2.5 py-1 rounded-md border border-red-500/20">
+                                    ${strat.badge}
+                                </span>
+                                <span class="text-xs text-yt-muted font-medium">${niche}</span>
+                            </div>
+
+                            <!-- Anteprima Mockup della Copertina -->
+                            <div class="relative w-full aspect-video bg-neutral-900 rounded-xl overflow-hidden border border-yt-border flex flex-col justify-between p-3 select-none">
+                                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                                
+                                <div class="relative z-10 flex justify-between items-start">
+                                    <span class="bg-black/80 backdrop-blur text-white font-extrabold text-xs sm:text-sm px-2.5 py-1 rounded uppercase tracking-wider border border-white/10 shadow-lg">
+                                        ${overlayText}
+                                    </span>
+                                    <span class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">High CTR</span>
+                                </div>
+
+                                <div class="relative z-10 text-right">
+                                    <span class="text-[10px] text-gray-400 bg-black/60 px-2 py-1 rounded backdrop-blur">
+                                        💡 Focus: ${tone}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Layout Visivo -->
+                            <div class="space-y-1.5">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-yt-muted flex items-center gap-1.5">
+                                    <span>📐</span> Layout Visivo Consigliato
+                                </h4>
+                                <p class="text-xs sm:text-sm text-yt-text leading-relaxed bg-yt-bg p-3 rounded-xl border border-yt-border">
+                                    ${strat.layout}
+                                </p>
+                            </div>
+
+                            <!-- Testo in Copertina -->
+                            <div class="space-y-1.5">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-yt-muted flex items-center gap-1.5">
+                                    <span>✍️</span> Testo da Inserire (Overlay)
+                                </h4>
+                                <div class="bg-yt-bg p-3 rounded-xl border border-yt-border flex items-center justify-between">
+                                    <span class="text-sm font-extrabold tracking-wide text-amber-400">
+                                        "${overlayText}"
+                                    </span>
+                                    <span class="text-[10px] text-yt-muted">Max 2-4 parole</span>
+                                </div>
+                            </div>
+
+                            <!-- Palette Colori -->
+                            <div class="space-y-1.5">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-yt-muted flex items-center gap-1.5">
+                                    <span>🎨</span> Schema Colori Contrasto
+                                </h4>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${colorChipsHtml}
+                                </div>
+                            </div>
+
+                            <!-- Espressione Volto / Posa -->
+                            <div class="space-y-1.5">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-yt-muted flex items-center gap-1.5">
+                                    <span>🎭</span> Espressione & Posa Chiave
+                                </h4>
+                                <p class="text-xs text-yt-text bg-yt-bg p-3 rounded-xl border border-yt-border leading-relaxed">
+                                    ${strat.expression}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="pt-2 border-t border-yt-border">
+                            <button onclick="copyConcept('${strat.badge}', '${overlayText}', '${encodeURIComponent(strat.layout)}', '${encodeURIComponent(strat.expression)}')" 
+                                class="w-full bg-yt-hover hover:bg-yt-border text-yt-text hover:text-white text-xs font-semibold py-2.5 rounded-xl border border-yt-border transition flex items-center justify-center gap-2">
+                                <span>📋</span> Copia Questo Concept
+                            </button>
+                        </div>
+
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            });
+        }
+
+        // Copia singolo concept
+        function copyConcept(badge, text, encodedLayout, encodedExpression) {
+            const layout = decodeURIComponent(encodedLayout);
+            const expression = decodeURIComponent(encodedExpression);
+
+            const content = `🎯 ${badge}\n- Testo Copertina: "${text}"\n- Layout Visivo: ${layout}\n- Espressione Chiave: ${expression}`;
+
+            copyToClipboard(content);
+            showToast("Concept copiato negli appunti!");
+        }
+
+        // Copia tutti i 3 concept
+        function copyAllConcepts() {
+            const cards = document.querySelectorAll('#conceptsGrid > div');
+            if (cards.length === 0) return;
+
+            let fullText = `🚀 YOUTUBE THUMBNAIL CONCEPTS GENERATI:\n\n`;
+
+            cards.forEach((card, idx) => {
+                const badge = card.querySelector('.text-red-500').innerText;
+                const overlay = card.querySelector('.text-amber-400').innerText;
+                const layout = card.querySelectorAll('p.text-yt-text')[0].innerText;
+                const expression = card.querySelectorAll('p.text-yt-text')[1].innerText;
+
+                fullText += `--- ${badge} ---\n`;
+                fullText += `• Testo Overlay: ${overlay}\n`;
+                fullText += `• Layout: ${layout}\n`;
+                fullText += `• Espressione: ${expression}\n\n`;
+            });
+
+            copyToClipboard(fullText);
+            showToast("Tutti i 3 concept sono stati copiati!");
+        }
+
+        // Helper Clipboard sicuro
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Errore copia appunti', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Gestione Checklist Progress Bar
+        function updateChecklistProgress() {
+            const checkboxes = document.querySelectorAll('#checklistContainer input[type="checkbox"]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const total = checkboxes.length;
+            const percentage = Math.round((checkedCount / total) * 100);
+
+            // Aggiorna score e barra
+            document.getElementById('checklistScore').textContent = `${checkedCount} / ${total}`;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percentage}%`;
+
+            // Cambio colore se completato
+            if (percentage === 100) {
+                document.getElementById('checklistScore').className = "text-sm font-bold text-emerald-400";
+            } else {
+                document.getElementById('checklistScore').className = "text-sm font-bold text-red-500";
+            }
+        }
+    </script>
+</body>
+</html>
